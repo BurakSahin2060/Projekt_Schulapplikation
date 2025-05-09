@@ -1,33 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
+using Schulwebapplikation.Controllers.Rest_API.Models;
 
 namespace Schulwebapplikation.Controllers
 {
+    [Route("api/[controller]")]
     [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class Addiert1zuInput : Controller
     {
-        private static readonly string[] Summaries = new[]
+        [HttpPut("{number}")]
+        public IActionResult Numberadding(int number)
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
+            int numberplusone = number + 1;
+            if (number < 10)
+            { return BadRequest("Number was samller then 10"); }
 
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
+            return Ok(numberplusone);
         }
+    }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+    [Route("api/sumOfInputs")]
+    [ApiController]
+    public class SumOfInputsController : ControllerBase
+    {
+        [HttpPut("sumOfNumbers")]
+        public IActionResult SumOfNumbers([FromBody] SumRequest request)
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            if (request == null)
             {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                return BadRequest("Invalid input.");
+            }
+
+            int result = request.Input1 + request.Input2;
+            return Ok(result);
+        }
+    }
+
+
+    namespace Rest_API.Models
+    {
+        public class SumRequest
+        {
+            public int Input1 { get; set; }
+            public int Input2 { get; set; }
         }
     }
 }
