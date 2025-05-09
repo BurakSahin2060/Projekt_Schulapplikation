@@ -1,42 +1,95 @@
-﻿document.getElementById('schuelerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const schueler = {
-        klassen: [document.getElementById('klasse').value],
-        geburtstag: document.getElementById('geburtstag').value,
-        geschlecht: document.getElementById('geschlecht').value
-    };
+﻿document.addEventListener("DOMContentLoaded", () => {
+    const baseUrl = "http://localhost:5287";
 
-    await fetch('https://localhost:5001/api/Schueler', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(schueler)
+    // Schüler hinzufügen
+    document.getElementById("addStudentForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const name = document.getElementById("name").value; // Neues Eingabefeld für Name
+        const geburtstag = document.getElementById("geburtstag").value; // YYYY-MM-DD
+        const geschlecht = document.getElementById("geschlecht").value;
+        const klasse = document.getElementById("klasse").value;
+
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/addSchueler`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name, // Name wird zum Payload hinzugefügt
+                    geburtstag: new Date(geburtstag).toISOString(), // Konvertiere zu ISO-Format
+                    geschlecht,
+                    klasse
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(await response.text());
+            }
+
+            const result = await response.text();
+            alert(result); // z.B. "Schüler hinzugefügt!"
+        } catch (error) {
+            alert(`Fehler: ${error.message}`);
+        }
     });
 
-    loadSchueler();
+    // Alle Schüler abrufen
+    document.getElementById("getAllStudents").addEventListener("click", async () => {
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/getAllSchueler`);
+            if (!response.ok) {
+                throw new Error("Fehler beim Abrufen der Schüler.");
+            }
+            const students = await response.json();
+            const list = document.getElementById("studentsList");
+            list.innerHTML = students.map(s => {
+                const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
+                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`; // Name wird angezeigt
+            }).join("");
+        } catch (error) {
+            alert(`Fehler: ${error.message}`);
+        }
+    });
+
+    // Schüler einer Klasse abrufen
+    document.getElementById("getStudentsByClass").addEventListener("click", async () => {
+        const klasse = document.getElementById("classFilter").value.trim();
+        if (!klasse) {
+            alert("Bitte eine Klasse eingeben.");
+            return;
+        }
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/getSchuelerByKlasse/${klasse}`);
+            if (!response.ok) {
+                throw new Error("Fehler beim Abrufen der Schüler.");
+            }
+            const students = await response.json();
+            const list = document.getElementById("classStudentsList");
+            list.innerHTML = students.map(s => {
+                const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
+                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`; // Name wird angezeigt
+            }).join("");
+        } catch (error) {
+            alert(`Fehler: ${error.message}`);
+        }
+    });
+
+    // Klassenraum prüfen
+    document.getElementById("checkRoom").addEventListener("click", async () => {
+        const klasse = document.getElementById("checkClass").value.trim();
+        const raumName = document.getElementById("roomSize").value.trim();
+        if (!klasse || !raumName) {
+            alert("Bitte Klasse und Raumgröße eingeben.");
+            return;
+        }
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/kannUnterrichten/${klasse}/${raumName}`);
+            if (!response.ok) {
+                throw new Error("Fehler bei der Prüfung.");
+            }
+            const result = await response.text();
+            document.getElementById("roomCheckResult").textContent = result;
+        } catch (error) {
+            alert(`Fehler: ${error.message}`);
+        }
+    });
 });
-
-async function loadSchueler() {
-    const response = await fetch('https://localhost:5001/api/Schueler');
-    const schueler = await response.json();
-    const tbody = document.querySelector('#schuelerTable tbody');
-    tbody.innerHTML = '';
-    schueler.forEach(s => {
-        const row = `<tr>
-            <td>${s.id}</td>
-            <td>${s.aktuelleKlasse}</td>
-            <td>${s.alter}</td>
-            <td>${s.geschlecht}</td>
-            <td><button onclick="deleteSchueler(${s.id})">Löschen</button></td>
-        </tr>`;
-        tbody.innerHTML += row;
-    });
-}
-
-async function deleteSchueler(id) {
-    await fetch(`https://localhost:5001/api/Schueler/${id}`, {
-        method: 'DELETE'
-    });
-    loadSchueler();
-}
-
-loadSchueler();

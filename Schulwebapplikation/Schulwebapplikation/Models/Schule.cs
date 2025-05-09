@@ -4,64 +4,119 @@ namespace Schulwebapplikation.Models
 {
     public class Schule
     {
-        public List<Schueler> SchuelerListe { get; set; } = new();
-        public List<Klassenraum> KlassenraumListe { get; set; } = new();
+        public List<Schueler> SchuelerList = new List<Schueler>();
+        public List<Klassenraum> KlassenraumList = new List<Klassenraum>();
 
-        public void AddSchueler(Schueler schueler)
+        public void AddSchuelerToSchule(Schueler schueler)
         {
-            SchuelerListe.Add(schueler);
+            SchuelerList.Add(schueler);
         }
-
-        public void AddKlassenraum(Klassenraum klassenraum)
+        public void AddKlassenraumToSchule(Klassenraum klassenraum)
         {
-            KlassenraumListe.Add(klassenraum);
+            KlassenraumList.Add(klassenraum);
         }
-
-        public int AnzahlSchueler => SchuelerListe.Count;
-
-        public int AnzahlKlassenraeume => KlassenraumListe.Count;
-
-        public List<Klassenraum> RaeumeMitCynap()
+        public int AnzahlSchueler
         {
-            return KlassenraumListe.Where(r => r.HatCynap).ToList();
+            get { return SchuelerList.Count; }
         }
-
-        public double Durchschnittsalter()
+        public int AnzahlKlassenRaum
         {
-            if (AnzahlSchueler == 0) return 0;
-            return SchuelerListe.Average(s => s.Alter);
+            get { return KlassenraumList.Count; }
         }
-
-        public double FrauenanteilInProzent(string klasse)
+        public List<Klassenraum> AnzahlRauemeCynap()
         {
-            var schuelerDerKlasse = SchuelerListe.Where(s => s.AktuelleKlasse == klasse).ToList();
-            if (!schuelerDerKlasse.Any()) return 0;
+            List<Klassenraum> KlassenraumCynap = new List<Klassenraum>();
+            foreach (Klassenraum klassenraum in KlassenraumList)
+            {
+                if (klassenraum.HasCynap)
+                {
+                    KlassenraumCynap.Add(klassenraum);
+                }
+            }
+            return KlassenraumCynap;
+        }
+        public int AnzahlKlassen(Schueler schueler)
+        {
+            return schueler.klassen.Count;
+        }
+        public float DurchschnittsalterSchueler()
+        {
+            int sumAlter = 0;
+            foreach (Schueler schueler in SchuelerList)
+            {
+                sumAlter += schueler.Alter;
+            }
+            return (float)sumAlter / AnzahlSchueler;
+        }
+        public double BerechneFrauenanteilInProzent(List<Schueler> schuelerListe, string klasse)
+        {
+            int anzahlSchueler = 0;
+            int anzahlFrauen = 0;
 
-            int anzahlFrauen = schuelerDerKlasse.Count(s => s.Geschlecht == "weiblich");
-            return (double)anzahlFrauen / schuelerDerKlasse.Count * 100;
+            foreach (Schueler schueler in schuelerListe)
+            {
+                if (schueler.Klasse == klasse)
+                {
+                    anzahlSchueler++;
+                    if (schueler.Geschlecht == "weiblich")
+                    {
+                        anzahlFrauen++;
+                    }
+                }
+            }
+
+            if (anzahlSchueler == 0)
+                return 0;
+
+            return (double)anzahlFrauen / anzahlSchueler * 100;
         }
 
         public bool KannKlasseUnterrichten(string klasse, string raumName)
         {
-            int anzahlSchueler = SchuelerListe.Count(s => s.AktuelleKlasse == klasse);
-            Klassenraum? raum = KlassenraumListe.FirstOrDefault(r => r.RaumName == raumName);
+            int schuelerInKlasse = 0;
+            Klassenraum raum = null;
 
-            return raum != null && raum.Plaetze >= anzahlSchueler;
+            foreach (Schueler schueler in SchuelerList)
+            {
+                if (schueler.Klasse == klasse)
+                {
+                    schuelerInKlasse++;
+                }
+            }
+
+            foreach (Klassenraum klassenraum in KlassenraumList)
+            {
+                if (klassenraum.RaumInQm.ToString() == raumName)
+                {
+                    raum = klassenraum;
+                    break;
+                }
+            }
+            if (raum == null) return false;
+
+            return raum.Plaetze >= schuelerInKlasse;
         }
 
-        public string AnzahlSchuelerNachGeschlecht
+        public string AnzahlSchuelerGeschlecht
         {
             get
             {
-                int maennlich = SchuelerListe.Count(s => s.Geschlecht == "männlich");
-                int weiblich = SchuelerListe.Count(s => s.Geschlecht == "weiblich");
-                return $"männliche: {maennlich} / weibliche: {weiblich}";
-            }
-        }
+                int männlicheSchueler = 0;
+                int weiblicheSchueler = 0;
 
-        public int AnzahlKlassenProSchueler(Schueler schueler)
-        {
-            return schueler.Klassen.Count;
+                foreach (Schueler schueler in SchuelerList)
+                {
+                    if (schueler.Geschlecht == "männlich")
+                    {
+                        männlicheSchueler++;
+                    }
+                    else if (schueler.Geschlecht == "weiblich")
+                    {
+                        weiblicheSchueler++;
+                    }
+                }
+                return $"männliche: {männlicheSchueler} / weibliche: {weiblicheSchueler}";
+            }
         }
     }
 }

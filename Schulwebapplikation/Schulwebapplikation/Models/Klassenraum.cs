@@ -2,19 +2,16 @@
 {
     public class Klassenraum
     {
-        public string RaumName { get; set; }
         public float RaumInQm { get; set; }
         public int Plaetze { get; set; }
-        public bool HatCynap { get; set; }
+        public bool HasCynap { get; set; }
 
-        public List<Schueler> SchuelerImRaum { get; set; } = new();
-
-        public Klassenraum(string raumName, float raumInQm, int plaetze, bool hatCynap)
+        public List<Schueler> SchuelerImRaum = new List<Schueler>();
+        public Klassenraum(float raumInQm, int plaetze, bool hasCynap)
         {
-            RaumName = raumName;
             RaumInQm = raumInQm;
             Plaetze = plaetze;
-            HatCynap = hatCynap;
+            HasCynap = hasCynap;
         }
     }
 }
