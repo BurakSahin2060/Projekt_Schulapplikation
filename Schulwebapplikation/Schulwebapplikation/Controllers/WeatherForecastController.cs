@@ -1,33 +1,47 @@
 using Microsoft.AspNetCore.Mvc;
+using Schulwebapplikation.Controllers.Rest_API.Models;
 
 namespace Schulwebapplikation.Controllers
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    //[Route("api/[controller]")]
+    //[ApiController]
+    //public class Addiert1zuInput : Controller
+    //{
+    //    [HttpPut("{number}")]
+    //    public IActionResult Numberadding(int number)
+    //    {
+    //        int numberplusone = number + 1;
+    //        if (number < 10)
+    //        { return BadRequest("Number was samller then 10"); }
+
+    //        return Ok(numberplusone);
+    //    }
+    //}
+
+    //[Route("api/sumOfInputs")]
+    //[ApiController]
+    //public class SumOfInputsController : ControllerBase
+    //{
+    //    [HttpPut("sumOfNumbers")]
+    //    public IActionResult SumOfNumbers([FromBody] SumRequest request)
+    //    {
+    //        if (request == null)
+    //        {
+    //            return BadRequest("Invalid input.");
+    //        }
+
+    //        int result = request.Input1 + request.Input2;
+    //        return Ok(result);
+    //    }
+    //}
+
+
+    namespace Rest_API.Models
     {
-        private static readonly string[] Summaries = new[]
+        public class SumRequest
         {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
-        }
-
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
-        {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            public int Input1 { get; set; }
+            public int Input2 { get; set; }
         }
     }
 }
