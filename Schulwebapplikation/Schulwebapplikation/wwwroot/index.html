@@ -4,106 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schulverwaltung</title>
-    <script defer src="script.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
         body {
-            background: linear-gradient(to bottom right, #f3f4f6, #e5e7eb);
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
 
-        .fade-in {
-            animation: fadeIn 0.5s ease-in;
+        .section {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
 
-        @keyframes fadeIn {
-            0% {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        h2 {
+            margin-top: 0;
         }
 
-        button:hover {
-            transform: scale(1.05);
-            transition: transform 0.2s ease;
+        label {
+            display: inline-block;
+            width: 120px;
+            margin: 5px 0;
         }
 
-        input, select {
-            transition: all 0.3s ease;
+        input, select, button {
+            margin: 5px;
+            padding: 5px;
         }
 
-            input:focus, select:focus {
-                ring: 2px solid #3b82f6;
-                outline: none;
-            }
+        button {
+            cursor: pointer;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            margin: 5px 0;
+        }
+
+        #output {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            min-height: 50px;
+        }
     </style>
 </head>
-<body class="font-sans text-gray-800 p-6 md:p-10">
-    <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-        <h1 class="text-3xl font-bold text-center text-gray-900 mb-8">Schulverwaltung</h1>
+<body>
+    <h1>Schulverwaltung</h1>
 
-        <section class="mb-10 fade-in">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Neuen Schüler hinzufügen</h2>
-            <form id="addStudentForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Name</label>
-                    <input type="text" id="name" placeholder="z.B. Max Mustermann" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Geburtstag</label>
-                    <input type="date" id="geburtstag" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Geschlecht</label>
-                    <select id="geschlecht" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                        <option value="männlich">Männlich</option>
-                        <option value="weiblich">Weiblich</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Klasse</label>
-                    <input type="text" id="klasse" placeholder="z.B. 10A" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">Schüler hinzufügen</button>
-            </form>
-        </section>
-
-        <section class="mb-10 fade-in">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Alle Schüler der Schule abrufen</h2>
-            <button id="getAllStudents" class="w-full bg-green-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-700 transition duration-200">Lade alle Schüler</button>
-            <ul id="studentsList" class="mt-4 space-y-2"></ul>
-        </section>
-
-        <section class="mb-10 fade-in">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Schüler einer bestimmten Klasse abrufen</h2>
-            <div class="flex space-x-2">
-                <input type="text" id="classFilter" placeholder="z.B. 10A" class="flex-1 rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                <button id="getStudentsByClass" class="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-indigo-700 transition duration-200">Laden</button>
-            </div>
-            <ul id="classStudentsList" class="mt-4 space-y-2"></ul>
-        </section>
-
-        <section class="fade-in">
-            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Kann eine Klasse in einem Klassenraum unterrichtet werden?</h2>
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Klasse</label>
-                    <input type="text" id="checkClass" placeholder="z.B. 10A" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Raumgröße in m²</label>
-                    <input type="text" id="roomSize" placeholder="z.B. 50" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-blue-500 focus:border-blue-500 p-2">
-                </div>
-                <button id="checkRoom" class="w-full bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 transition duration-200">Prüfen</button>
-            </div>
-            <p id="roomCheckResult" class="mt-4 text-gray-700"></p>
-        </section>
+    <div class="section">
+        <h2>Schüler hinzufügen</h2>
+        <form id="addStudentForm">
+            <label>Name:</label><input type="text" id="name" required><br>
+            <label>Geburtstag:</label><input type="date" id="geburtstag" required><br>
+            <label>Geschlecht:</label>
+            <select id="geschlecht" required>
+                <option value="männlich">Männlich</option>
+                <option value="weiblich">Weiblich</option>
+            </select><br>
+            <label>Klasse:</label><input type="text" id="klasse" required><br>
+            <button type="submit">Schüler hinzufügen</button>
+        </form>
     </div>
-    <script>(function () { function c() { var b = a.contentDocument || a.contentWindow.document; if (b) { var d = b.createElement('script'); d.innerHTML = "window.__CF$cv$params={r:'93d0ef8c8ea0c010',t:'MTc0Njc5MDk3MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);"; b.getElementsByTagName('head')[0].appendChild(d) } } if (document.body) { var a = document.createElement('iframe'); a.height = 1; a.width = 1; a.style.position = 'absolute'; a.style.top = 0; a.style.left = 0; a.style.border = 'none'; a.style.visibility = 'hidden'; document.body.appendChild(a); if ('loading' !== document.readyState) c(); else if (window.addEventListener) document.addEventListener('DOMContentLoaded', c); else { var e = document.onreadystatechange || function () { }; document.onreadystatechange = function (b) { e(b); 'loading' !== document.readyState && (document.onreadystatechange = e, c()) } } } })();</script>
+
+    <div class="section">
+        <h2>Klassenraum hinzufügen</h2>
+        <form id="addRoomForm">
+            <label>Name:</label><input type="text" id="raumName" required><br>
+            <label>Größe (qm):</label><input type="number" id="raumGroesse" step="0.1" required><br>
+            <label>Plätze:</label><input type="number" id="raumPlaetze" required><br>
+            <label>Cynap:</label><input type="checkbox" id="raumCynap"><br>
+            <button type="submit">Klassenraum hinzufügen</button>
+        </form>
+    </div>
+
+    <div class="section">
+        <h2>Alle Schüler abrufen</h2>
+        <button id="getAllStudents">Lade alle Schüler</button>
+        <ul id="studentsList"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Schüler einer Klasse abrufen</h2>
+        <label>Klasse:</label><input type="text" id="classFilter">
+        <button id="getStudentsByClass">Laden</button>
+        <ul id="classStudentsList"></ul>
+    </div>
+
+    <div class="section">
+        <h2>Kann Klasse unterrichtet werden?</h2>
+        <label>Klasse:</label><input type="text" id="checkClass" required>
+        <label>Raumname:</label><input type="text" id="checkRoomName" required>
+        <button id="checkRoom">Prüfen</button>
+        <div id="roomCheckResult"></div>
+    </div>
+
+    <div class="section">
+        <h2>Statistiken</h2>
+        <button id="getAverageAge">Durchschnittsalter</button>
+        <label>Klasse für Frauenanteil:</label><input type="text" id="frauenKlasse">
+        <button id="getFemalePercentage">Frauenanteil</button>
+        <div id="statsOutput"></div>
+    </div>
+
+    <div id="output"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>

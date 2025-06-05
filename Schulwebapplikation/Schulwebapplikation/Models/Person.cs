@@ -2,11 +2,11 @@
 {
     public class Person
     {
-        private string _geschlecht;
+        private string? _geschlecht; // Make nullable to avoid CS8618
 
         public string Geschlecht
         {
-            get => _geschlecht;
+            get => _geschlecht ?? "unbekannt";
             set
             {
                 if (value != "männlich" && value != "weiblich")
@@ -26,7 +26,7 @@
         public Person(DateTime geburtstag, string geschlecht)
         {
             Geburtstag = geburtstag;
-            Geschlecht = geschlecht; // Setter wird aufgerufen
+            Geschlecht = geschlecht; // Setter handles validation
         }
     }
 }

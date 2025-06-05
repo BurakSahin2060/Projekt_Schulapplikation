@@ -4,8 +4,8 @@
     // Schüler hinzufügen
     document.getElementById("addStudentForm").addEventListener("submit", async (event) => {
         event.preventDefault();
-        const name = document.getElementById("name").value; // Neues Eingabefeld für Name
-        const geburtstag = document.getElementById("geburtstag").value; // YYYY-MM-DD
+        const name = document.getElementById("name").value;
+        const geburtstag = document.getElementById("geburtstag").value;
         const geschlecht = document.getElementById("geschlecht").value;
         const klasse = document.getElementById("klasse").value;
 
@@ -14,21 +14,50 @@
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    name, // Name wird zum Payload hinzugefügt
-                    geburtstag: new Date(geburtstag).toISOString(), // Konvertiere zu ISO-Format
+                    name,
+                    geburtstag: new Date(geburtstag).toISOString(),
                     geschlecht,
                     klasse
                 })
             });
 
+            const result = await response.json();
             if (!response.ok) {
-                throw new Error(await response.text());
+                throw new Error(result || "Fehler beim Hinzufügen des Schülers.");
             }
-
-            const result = await response.text();
-            alert(result); // z.B. "Schüler hinzugefügt!"
+            document.getElementById("output").textContent = result;
         } catch (error) {
-            alert(`Fehler: ${error.message}`);
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
+        }
+    });
+
+    // Klassenraum hinzufügen
+    document.getElementById("addRoomForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const raumName = document.getElementById("raumName").value;
+        const raumGroesse = parseFloat(document.getElementById("raumGroesse").value);
+        const raumPlaetze = parseInt(document.getElementById("raumPlaetze").value);
+        const raumCynap = document.getElementById("raumCynap").checked;
+
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/addKlassenraum`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: raumName,
+                    raumInQm: raumGroesse,
+                    plaetze: raumPlaetze,
+                    hasCynap: raumCynap
+                })
+            });
+
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result || "Fehler beim Hinzufügen des Klassenraums.");
+            }
+            document.getElementById("output").textContent = result;
+        } catch (error) {
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
         }
     });
 
@@ -43,10 +72,10 @@
             const list = document.getElementById("studentsList");
             list.innerHTML = students.map(s => {
                 const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
-                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`; // Name wird angezeigt
+                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
             }).join("");
         } catch (error) {
-            alert(`Fehler: ${error.message}`);
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
         }
     });
 
@@ -54,7 +83,7 @@
     document.getElementById("getStudentsByClass").addEventListener("click", async () => {
         const klasse = document.getElementById("classFilter").value.trim();
         if (!klasse) {
-            alert("Bitte eine Klasse eingeben.");
+            document.getElementById("output").textContent = "Bitte eine Klasse eingeben.";
             return;
         }
         try {
@@ -66,19 +95,19 @@
             const list = document.getElementById("classStudentsList");
             list.innerHTML = students.map(s => {
                 const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
-                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`; // Name wird angezeigt
+                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
             }).join("");
         } catch (error) {
-            alert(`Fehler: ${error.message}`);
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
         }
     });
 
     // Klassenraum prüfen
     document.getElementById("checkRoom").addEventListener("click", async () => {
         const klasse = document.getElementById("checkClass").value.trim();
-        const raumName = document.getElementById("roomSize").value.trim();
+        const raumName = document.getElementById("checkRoomName").value.trim();
         if (!klasse || !raumName) {
-            alert("Bitte Klasse und Raumgröße eingeben.");
+            document.getElementById("output").textContent = "Bitte Klasse und Raumname eingeben.";
             return;
         }
         try {
@@ -86,10 +115,43 @@
             if (!response.ok) {
                 throw new Error("Fehler bei der Prüfung.");
             }
-            const result = await response.text();
+            const result = await response.json();
             document.getElementById("roomCheckResult").textContent = result;
         } catch (error) {
-            alert(`Fehler: ${error.message}`);
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
+        }
+    });
+
+    // Durchschnittsalter abrufen
+    document.getElementById("getAverageAge").addEventListener("click", async () => {
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/durchschnittsalter`);
+            if (!response.ok) {
+                throw new Error("Fehler beim Abrufen des Durchschnittsalters.");
+            }
+            const result = await response.json();
+            document.getElementById("statsOutput").textContent = `Durchschnittsalter: ${result.toFixed(2)} Jahre`;
+        } catch (error) {
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
+        }
+    });
+
+    // Frauenanteil abrufen
+    document.getElementById("getFemalePercentage").addEventListener("click", async () => {
+        const klasse = document.getElementById("frauenKlasse").value.trim();
+        if (!klasse) {
+            document.getElementById("output").textContent = "Bitte eine Klasse eingeben.";
+            return;
+        }
+        try {
+            const response = await fetch(`${baseUrl}/api/schule/frauenanteil/${klasse}`);
+            if (!response.ok) {
+                throw new Error("Fehler beim Abrufen des Frauenanteils.");
+            }
+            const result = await response.json();
+            document.getElementById("statsOutput").textContent = `Frauenanteil in Klasse ${klasse}: ${result.toFixed(2)}%`;
+        } catch (error) {
+            document.getElementById("output").textContent = `Fehler: ${error.message}`;
         }
     });
 });

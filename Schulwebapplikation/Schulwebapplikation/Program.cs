@@ -1,13 +1,19 @@
+using Microsoft.EntityFrameworkCore;
+using Schulwebapplikation.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Set specific port for the application
+builder.WebHost.UseUrls("http://localhost:5287");
 
 // CORS für lokale Anfragen aktivieren
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.WithOrigins("http://127.0.0.1:5294") // Erlaubt Anfragen von diesem Host
-              .AllowAnyMethod() // Erlaubt GET, POST, PUT, DELETE, etc.
-              .AllowAnyHeader(); // Erlaubt alle Header
+        policy.WithOrigins("http://localhost:5287") // Allow the same origin
+              .AllowAnyMethod()
+              .AllowAnyHeader();
     });
 });
 
@@ -15,11 +21,16 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddDbContext<DBContext>(options =>
+    options.UseSqlite("Data Source=schule.db"));
 
 var app = builder.Build();
 
 // CORS aktivieren
 app.UseCors("AllowLocalhost");
+
+// Static files aktivieren
+app.UseStaticFiles();
 
 // Swagger aktivieren (nur im Development-Modus)
 if (app.Environment.IsDevelopment())
@@ -29,7 +40,6 @@ if (app.Environment.IsDevelopment())
 }
 
 // Middleware-Konfiguration
-app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
