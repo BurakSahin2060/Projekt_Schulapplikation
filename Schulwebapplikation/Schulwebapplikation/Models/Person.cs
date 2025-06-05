@@ -26,7 +26,7 @@
         public Person(DateTime geburtstag, string geschlecht)
         {
             Geburtstag = geburtstag;
-            Geschlecht = geschlecht;
+            Geschlecht = geschlecht; // Setter wird aufgerufen
         }
     }
 }
