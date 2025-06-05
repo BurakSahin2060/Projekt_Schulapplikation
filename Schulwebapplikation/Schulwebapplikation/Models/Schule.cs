@@ -4,96 +4,55 @@ namespace Schulwebapplikation.Models
 {
     public class Schule
     {
-        public List<Schueler> SchuelerList = new List<Schueler>();
-        public List<Klassenraum> KlassenraumList = new List<Klassenraum>();
+        public List<Schueler> SchuelerList { get; set; } = new List<Schueler>();
+        public List<Klassenraum> KlassenraumList { get; set; } = new List<Klassenraum>();
 
         public void AddSchuelerToSchule(Schueler schueler)
         {
             SchuelerList.Add(schueler);
         }
+
         public void AddKlassenraumToSchule(Klassenraum klassenraum)
         {
             KlassenraumList.Add(klassenraum);
         }
+
         public int AnzahlSchueler
         {
-            get { return SchuelerList.Count; }
+            get => SchuelerList.Count;
         }
+
         public int AnzahlKlassenRaum
         {
-            get { return KlassenraumList.Count; }
+            get => KlassenraumList.Count;
         }
+
         public List<Klassenraum> AnzahlRauemeCynap()
         {
-            List<Klassenraum> KlassenraumCynap = new List<Klassenraum>();
-            foreach (Klassenraum klassenraum in KlassenraumList)
-            {
-                if (klassenraum.HasCynap)
-                {
-                    KlassenraumCynap.Add(klassenraum);
-                }
-            }
-            return KlassenraumCynap;
+            return KlassenraumList.Where(r => r.HasCynap).ToList();
         }
-        public int AnzahlKlassen(Schueler schueler)
-        {
-            return schueler.klassen.Count;
-        }
+
         public float DurchschnittsalterSchueler()
         {
-            int sumAlter = 0;
-            foreach (Schueler schueler in SchuelerList)
-            {
-                sumAlter += schueler.Alter;
-            }
-            return (float)sumAlter / AnzahlSchueler;
+            if (!SchuelerList.Any()) return 0;
+            return (float)SchuelerList.Average(s => s.Alter);
         }
+
         public double BerechneFrauenanteilInProzent(List<Schueler> schuelerListe, string klasse)
         {
-            int anzahlSchueler = 0;
-            int anzahlFrauen = 0;
+            var schuelerInKlasse = schuelerListe.Where(s => s.Klasse == klasse).ToList();
+            if (!schuelerInKlasse.Any()) return 0;
 
-            foreach (Schueler schueler in schuelerListe)
-            {
-                if (schueler.Klasse == klasse)
-                {
-                    anzahlSchueler++;
-                    if (schueler.Geschlecht == "weiblich")
-                    {
-                        anzahlFrauen++;
-                    }
-                }
-            }
-
-            if (anzahlSchueler == 0)
-                return 0;
-
-            return (double)anzahlFrauen / anzahlSchueler * 100;
+            int anzahlFrauen = schuelerInKlasse.Count(s => s.Geschlecht == "weiblich");
+            return (double)anzahlFrauen / schuelerInKlasse.Count * 100;
         }
 
         public bool KannKlasseUnterrichten(string klasse, string raumName)
         {
-            int schuelerInKlasse = 0;
-            Klassenraum raum = null;
+            int schuelerInKlasse = SchuelerList.Count(s => s.Klasse == klasse);
+            var raum = KlassenraumList.FirstOrDefault(r => r.Name == raumName);
 
-            foreach (Schueler schueler in SchuelerList)
-            {
-                if (schueler.Klasse == klasse)
-                {
-                    schuelerInKlasse++;
-                }
-            }
-
-            foreach (Klassenraum klassenraum in KlassenraumList)
-            {
-                if (klassenraum.RaumInQm.ToString() == raumName)
-                {
-                    raum = klassenraum;
-                    break;
-                }
-            }
             if (raum == null) return false;
-
             return raum.Plaetze >= schuelerInKlasse;
         }
 
@@ -101,20 +60,8 @@ namespace Schulwebapplikation.Models
         {
             get
             {
-                int männlicheSchueler = 0;
-                int weiblicheSchueler = 0;
-
-                foreach (Schueler schueler in SchuelerList)
-                {
-                    if (schueler.Geschlecht == "männlich")
-                    {
-                        männlicheSchueler++;
-                    }
-                    else if (schueler.Geschlecht == "weiblich")
-                    {
-                        weiblicheSchueler++;
-                    }
-                }
+                int männlicheSchueler = SchuelerList.Count(s => s.Geschlecht == "männlich");
+                int weiblicheSchueler = SchuelerList.Count(s => s.Geschlecht == "weiblich");
                 return $"männliche: {männlicheSchueler} / weibliche: {weiblicheSchueler}";
             }
         }
