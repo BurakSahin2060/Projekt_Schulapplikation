@@ -4,116 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Schulverwaltung</title>
-    
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-        }
-
-        .section {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-
-        h2 {
-            margin-top: 0;
-        }
-
-        label {
-            display: inline-block;
-            width: 120px;
-            margin: 5px 0;
-        }
-
-        input, select, button {
-            margin: 5px;
-            padding: 5px;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            margin: 5px 0;
-        }
-
-        #output {
-            margin-top: 10px;
-            padding: 10px;
-            border: 1px solid #ddd;
-            min-height: 50px;
-        }
-    </style>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <h1>Schulverwaltung</h1>
+<body class="bg-light">
+    <div class="container my-4">
+        <h1 class="mb-4">Schulverwaltung</h1>
 
-    <div class="section">
-        <h2>Schüler hinzufügen</h2>
-        <form id="addStudentForm">
-            <label>Name:</label><input type="text" id="name" required><br>
-            <label>Geburtstag:</label><input type="date" id="geburtstag" required><br>
-            <label>Geschlecht:</label>
-            <select id="geschlecht" required>
-                <option value="männlich">Männlich</option>
-                <option value="weiblich">Weiblich</option>
-            </select><br>
-            <label>Klasse:</label><input type="text" id="klasse" required><br>
-            <button type="submit">Schüler hinzufügen</button>
-        </form>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Schüler hinzufügen</h2>
+                <form id="addStudentForm">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="geburtstag" class="form-label">Geburtstag:</label>
+                        <input type="date" class="form-control" id="geburtstag" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="geschlecht" class="form-label">Geschlecht:</label>
+                        <select class="form-select" id="geschlecht" required>
+                            <option value="männlich">Männlich</option>
+                            <option value="weiblich">Weiblich</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="klasse" class="form-label">Klasse:</label>
+                        <input type="text" class="form-control" id="klasse" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Schüler hinzufügen</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Klassenraum hinzufügen</h2>
+                <form id="addRoomForm">
+                    <div class="mb-3">
+                        <label for="raumName" class="form-label">Name:</label>
+                        <input type="text" class="form-control" id="raumName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="raumGroesse" class="form-label">Größe (qm):</label>
+                        <input type="number" class="form-control" id="raumGroesse" step="0.1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="raumPlaetze" class="form-label">Plätze:</label>
+                        <input type="number" class="form-control" id="raumPlaetze" required>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="raumCynap">
+                        <label class="form-check-label" for="raumCynap">Cynap</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Klassenraum hinzufügen</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Alle Schüler abrufen</h2>
+                <button id="getAllStudents" class="btn btn-primary mb-3">Lade alle Schüler</button>
+                <ul id="studentsList" class="list-group"></ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Schüler einer Klasse abrufen</h2>
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="classFilter" placeholder="Klasse eingeben">
+                    <button id="getStudentsByClass" class="btn btn-primary">Laden</button>
+                </div>
+                <ul id="classStudentsList" class="list-group"></ul>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Kann Klasse unterrichtet werden?</h2>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <label for="checkClass" class="form-label">Klasse:</label>
+                        <input type="text" class="form-control" id="checkClass" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="checkRoomName" class="form-label">Raumname:</label>
+                        <input type="text" class="form-control" id="checkRoomName" required>
+                    </div>
+                </div>
+                <button id="checkRoom" class="btn btn-primary">Prüfen</button>
+                <div id="roomCheckResult" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="card-title">Statistiken</h2>
+                <div class="mb-3">
+                    <button id="getAverageAge" class="btn btn-primary me-2">Durchschnittsalter</button>
+                    <div class="input-group d-inline-flex">
+                        <input type="text" class="form-control" id="frauenKlasse" placeholder="Klasse für Frauenanteil">
+                        <button id="getFemalePercentage" class="btn btn-primary">Frauenanteil</button>
+                    </div>
+                </div>
+                <div id="statsOutput" class="mt-3"></div>
+            </div>
+        </div>
+
+        <div id="output" class="alert alert-info" role="alert"></div>
     </div>
 
-    <div class="section">
-        <h2>Klassenraum hinzufügen</h2>
-        <form id="addRoomForm">
-            <label>Name:</label><input type="text" id="raumName" required><br>
-            <label>Größe (qm):</label><input type="number" id="raumGroesse" step="0.1" required><br>
-            <label>Plätze:</label><input type="number" id="raumPlaetze" required><br>
-            <label>Cynap:</label><input type="checkbox" id="raumCynap"><br>
-            <button type="submit">Klassenraum hinzufügen</button>
-        </form>
-    </div>
-
-    <div class="section">
-        <h2>Alle Schüler abrufen</h2>
-        <button id="getAllStudents">Lade alle Schüler</button>
-        <ul id="studentsList"></ul>
-    </div>
-
-    <div class="section">
-        <h2>Schüler einer Klasse abrufen</h2>
-        <label>Klasse:</label><input type="text" id="classFilter">
-        <button id="getStudentsByClass">Laden</button>
-        <ul id="classStudentsList"></ul>
-    </div>
-
-    <div class="section">
-        <h2>Kann Klasse unterrichtet werden?</h2>
-        <label>Klasse:</label><input type="text" id="checkClass" required>
-        <label>Raumname:</label><input type="text" id="checkRoomName" required>
-        <button id="checkRoom">Prüfen</button>
-        <div id="roomCheckResult"></div>
-    </div>
-
-    <div class="section">
-        <h2>Statistiken</h2>
-        <button id="getAverageAge">Durchschnittsalter</button>
-        <label>Klasse für Frauenanteil:</label><input type="text" id="frauenKlasse">
-        <button id="getFemalePercentage">Frauenanteil</button>
-        <div id="statsOutput"></div>
-    </div>
-
-    <div id="output"></div>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

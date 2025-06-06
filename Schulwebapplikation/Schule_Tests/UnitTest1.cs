@@ -1,118 +1,282 @@
-using Schulwebapplikation.Models;
 using NUnit.Framework;
+using Schulwebapplikation.Models;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Schule_Tests
 {
     [TestFixture]
     public class SchuleTests
     {
-        private Schule schule;
+        private Schule _schule;
+        private Schueler _schueler1;
+        private Schueler _schueler2;
+        private Klassenraum _klassenraum;
 
         [SetUp]
-        public void Setup()
+        public void SetUp()
         {
-            schule = new Schule();
+            _schule = new Schule();
+            _schueler1 = new Schueler("Anna", "10A", new DateTime(2005, 5, 15), "weiblich");
+            _schueler2 = new Schueler("Ben", "10A", new DateTime(2006, 3, 10), "männlich");
+            _klassenraum = new Klassenraum("R101", 50.5f, 30, true);
         }
 
         [Test]
-        public void Person_Geschlecht_InvalidValue_SetsUnbekannt()
+        public void AddSchuelerToSchule_IncreasesSchuelerCount()
         {
+            // Arrange
+            int initialCount = _schule.AnzahlSchueler;
+
+            // Act
+            _schule.AddSchuelerToSchule(_schueler1);
+
+            // Assert
+            Assert.That(_schule.AnzahlSchueler, Is.EqualTo(initialCount + 1));
+            Assert.That(_schule.SchuelerList.Contains(_schueler1), Is.True);
+        }
+
+        [Test]
+        public void AddKlassenraumToSchule_IncreasesKlassenraumCount()
+        {
+            // Arrange
+            int initialCount = _schule.AnzahlKlassenRaum;
+
+            // Act
+            _schule.AddKlassenraumToSchule(_klassenraum);
+
+            // Assert
+            Assert.That(_schule.AnzahlKlassenRaum, Is.EqualTo(initialCount + 1));
+            Assert.That(_schule.KlassenraumList.Contains(_klassenraum), Is.True);
+        }
+
+        [Test]
+        public void AnzahlRauemeCynap_ReturnsOnlyCynapRooms()
+        {
+            // Arrange
+            var nonCynapRoom = new Klassenraum("R102", 40.0f, 25, false);
+            _schule.AddKlassenraumToSchule(_klassenraum);
+            _schule.AddKlassenraumToSchule(nonCynapRoom);
+
+            // Act
+            var cynapRooms = _schule.AnzahlRauemeCynap();
+
+            // Assert
+            Assert.That(cynapRooms.Count, Is.EqualTo(1));
+            Assert.That(cynapRooms.All(r => r.HasCynap), Is.True);
+        }
+
+        [Test]
+        public void AnzahlRauemeCynap_EmptyList_ReturnsEmptyList()
+        {
+            // Act
+            var cynapRooms = _schule.AnzahlRauemeCynap();
+
+            // Assert
+            Assert.That(cynapRooms, Is.Empty);
+        }
+
+        [Test]
+        public void DurchschnittsalterSchueler_ReturnsCorrectAverage()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1); // Age ~20 (2025-2005)
+            _schule.AddSchuelerToSchule(_schueler2); // Age ~19 (2025-2006)
+
+            // Act
+            float averageAge = _schule.DurchschnittsalterSchueler();
+
+            // Assert
+            Assert.That(averageAge, Is.EqualTo(19.5f).Within(0.1f));
+        }
+
+        [Test]
+        public void DurchschnittsalterSchueler_EmptyList_ReturnsZero()
+        {
+            // Act
+            float averageAge = _schule.DurchschnittsalterSchueler();
+
+            // Assert
+            Assert.That(averageAge, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void BerechneFrauenanteilInProzent_ReturnsCorrectPercentage()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1); // Female
+            _schule.AddSchuelerToSchule(_schueler2); // Male
+
+            // Act
+            double frauenAnteil = _schule.BerechneFrauenanteilInProzent(_schule.SchuelerList, "10A");
+
+            // Assert
+            Assert.That(frauenAnteil, Is.EqualTo(50.0).Within(0.1));
+        }
+
+        [Test]
+        public void BerechneFrauenanteilInProzent_EmptyClass_ReturnsZero()
+        {
+            // Act
+            double frauenAnteil = _schule.BerechneFrauenanteilInProzent(_schule.SchuelerList, "10B");
+
+            // Assert
+            Assert.That(frauenAnteil, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void BerechneFrauenanteilInProzent_NullList_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            Assert.Throws<ArgumentNullException>(() => _schule.BerechneFrauenanteilInProzent(null, "10A"));
+        }
+
+        [Test]
+        public void KannKlasseUnterrichten_SufficientCapacity_ReturnsTrue()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1);
+            _schule.AddSchuelerToSchule(_schueler2);
+            _schule.AddKlassenraumToSchule(_klassenraum);
+
+            // Act
+            bool canTeach = _schule.KannKlasseUnterrichten("10A", "R101");
+
+            // Assert
+            Assert.That(canTeach, Is.True);
+        }
+
+        [Test]
+        public void KannKlasseUnterrichten_InsufficientCapacity_ReturnsFalse()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1);
+            _schule.AddSchuelerToSchule(_schueler2);
+            var smallRoom = new Klassenraum("R103", 20.0f, 1, false);
+            _schule.AddKlassenraumToSchule(smallRoom);
+
+            // Act
+            bool canTeach = _schule.KannKlasseUnterrichten("10A", "R103");
+
+            // Assert
+            Assert.That(canTeach, Is.False);
+        }
+
+        [Test]
+        public void KannKlasseUnterrichten_NonExistentRoom_ReturnsFalse()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1);
+
+            // Act
+            bool canTeach = _schule.KannKlasseUnterrichten("10A", "R999");
+
+            // Assert
+            Assert.That(canTeach, Is.False);
+        }
+
+        [Test]
+        public void KannKlasseUnterrichten_EmptyClass_ReturnsTrue()
+        {
+            // Arrange
+            _schule.AddKlassenraumToSchule(_klassenraum);
+
+            // Act
+            bool canTeach = _schule.KannKlasseUnterrichten("10B", "R101");
+
+            // Assert
+            Assert.That(canTeach, Is.True); // Empty class fits in any room
+        }
+
+        [Test]
+        public void AnzahlSchuelerGeschlecht_ReturnsCorrectCountString()
+        {
+            // Arrange
+            _schule.AddSchuelerToSchule(_schueler1); // Female
+            _schule.AddSchuelerToSchule(_schueler2); // Male
+
+            // Act
+            string geschlechtCount = _schule.AnzahlSchuelerGeschlecht;
+
+            // Assert
+            Assert.That(geschlechtCount, Is.EqualTo("männliche: 1 / weibliche: 1"));
+        }
+
+        [Test]
+        public void AnzahlSchuelerGeschlecht_EmptyList_ReturnsZeroCounts()
+        {
+            // Act
+            string geschlechtCount = _schule.AnzahlSchuelerGeschlecht;
+
+            // Assert
+            Assert.That(geschlechtCount, Is.EqualTo("männliche: 0 / weibliche: 0"));
+        }
+
+        [Test]
+        public void Person_Geschlecht_InvalidInput_SetsUnbekannt()
+        {
+            // Arrange
             var person = new Person(new DateTime(2000, 1, 1), "invalid");
-            Assert.AreEqual("unbekannt", person.Geschlecht);
+
+            // Act
+            string geschlecht = person.Geschlecht;
+
+            // Assert
+            Assert.That(geschlecht, Is.EqualTo("unbekannt"));
         }
 
         [Test]
-        public void Person_Geschlecht_ValidValue_SetsCorrectly()
+        public void Person_Geschlecht_ValidInput_SetsCorrectly()
         {
-            var person = new Person(new DateTime(2000, 1, 1), "männlich");
-            Assert.AreEqual("männlich", person.Geschlecht);
+            // Arrange
+            var person = new Person(new DateTime(2000, 1, 1), "weiblich");
+
+            // Act
+            string geschlecht = person.Geschlecht;
+
+            // Assert
+            Assert.That(geschlecht, Is.EqualTo("weiblich"));
         }
 
         [Test]
-        public void Schueler_Alter_Calculation_Correct()
+        public void Person_Geschlecht_NullInput_SetsUnbekannt()
         {
-            var schueler = new Schueler("TestSchueler", "10A", new DateTime(2005, 1, 1), "männlich");
-            int expectedAge = DateTime.Today.Year - 2005;
-            Assert.AreEqual(expectedAge, schueler.Alter);
+            // Arrange
+            var person = new Person(new DateTime(2000, 1, 1), null);
+
+            // Act
+            string geschlecht = person.Geschlecht;
+
+            // Assert
+            Assert.That(geschlecht, Is.EqualTo("unbekannt"));
         }
 
         [Test]
-        public void Schule_AddSchueler_IncreasesCount()
+        public void Schueler_Alter_CalculatesCorrectly()
         {
-            var schueler = new Schueler("TestSchueler", "10A", new DateTime(2005, 1, 1), "männlich");
-            schule.AddSchuelerToSchule(schueler);
-            Assert.AreEqual(1, schule.AnzahlSchueler);
+            // Arrange
+            var schueler = new Schueler("Test", "10A", new DateTime(2005, 5, 15), "männlich");
+
+            // Act
+            int alter = schueler.Alter;
+
+            // Assert
+            Assert.That(alter, Is.EqualTo(DateTime.Today.Year - 2005));
         }
 
         [Test]
-        public void Schule_AnzahlRauemeCynap_ReturnsOnlyCynapRooms()
+        public void Schueler_Alter_BirthdayToday_ReturnsCorrectAge()
         {
-            var raum1 = new Klassenraum(50, 30, true);
-            var raum2 = new Klassenraum(40, 25, false);
-            schule.AddKlassenraumToSchule(raum1);
-            schule.AddKlassenraumToSchule(raum2);
+            // Arrange
+            var today = DateTime.Today;
+            var schueler = new Schueler("Test", "10A", today.AddYears(-20), "männlich");
 
-            var cynapRooms = schule.AnzahlRauemeCynap();
-            Assert.AreEqual(1, cynapRooms.Count);
-            Assert.IsTrue(cynapRooms[0].HasCynap);
-        }
+            // Act
+            int alter = schueler.Alter;
 
-        [Test]
-        public void Schule_DurchschnittsalterSchueler_CorrectCalculation()
-        {
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler1", "10A", new DateTime(2005, 1, 1), "männlich"));
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler2", "10B", new DateTime(2007, 1, 1), "weiblich"));
-
-            float expectedAverage = (float)((DateTime.Today.Year - 2005) + (DateTime.Today.Year - 2007)) / 2;
-            Assert.AreEqual(expectedAverage, schule.DurchschnittsalterSchueler());
-        }
-
-        [Test]
-        public void Schule_BerechneFrauenanteilInProzent_CorrectCalculation()
-        {
-            var schuelerList = new List<Schueler>
-            {
-                new Schueler("TestSchueler1", "10A", new DateTime(2005, 1, 1), "männlich"),
-                new Schueler("TestSchueler2", "10A", new DateTime(2005, 1, 1), "weiblich"),
-                new Schueler("TestSchueler3", "10A", new DateTime(2005, 1, 1), "weiblich")
-            };
-
-            double result = schule.BerechneFrauenanteilInProzent(schuelerList, "10A");
-            Assert.AreEqual(66.66666666666666, result, 0.01);
-        }
-
-        [Test]
-        public void Schule_KannKlasseUnterrichten_EnoughSpace_ReturnsTrue()
-        {
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler1", "10A", new DateTime(2005, 1, 1), "männlich"));
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler2", "10A", new DateTime(2005, 1, 1), "weiblich"));
-            schule.AddKlassenraumToSchule(new Klassenraum(50, 0, true)); // Plaetze ist irrelevant
-
-            bool result = schule.KannKlasseUnterrichten("10A", "50");
-            Assert.IsTrue(result); // 50 m² / 2 m² pro Schüler = 25 Schüler, 2 Schüler < 25
-        }
-
-        [Test]
-        public void Schule_KannKlasseUnterrichten_NotEnoughSpace_ReturnsFalse()
-        {
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler1", "10A", new DateTime(2005, 1, 1), "männlich"));
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler2", "10A", new DateTime(2005, 1, 1), "weiblich"));
-            schule.AddKlassenraumToSchule(new Klassenraum(2, 0, true)); // Plaetze ist irrelevant
-
-            bool result = schule.KannKlasseUnterrichten("10A", "2");
-            Assert.IsFalse(result); // 2 m² / 2 m² pro Schüler = 1 Schüler, 2 Schüler > 1
-        }
-
-        [Test]
-        public void Schule_AnzahlSchuelerGeschlecht_CorrectCount()
-        {
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler1", "10A", new DateTime(2005, 1, 1), "männlich"));
-            schule.AddSchuelerToSchule(new Schueler("TestSchueler2", "10B", new DateTime(2005, 1, 1), "weiblich"));
-
-            string result = schule.AnzahlSchuelerGeschlecht;
-            Assert.AreEqual("männliche: 1 / weibliche: 1", result);
+            // Assert
+            Assert.That(alter, Is.EqualTo(20));
         }
     }
 }

@@ -6,7 +6,7 @@
         public string Name { get; set; }
         public string Klasse { get; set; }
 
-        public virtual int Alter
+        public int Alter
         {
             get => DateTime.Today.Year - Geburtstag.Year;
             set { }

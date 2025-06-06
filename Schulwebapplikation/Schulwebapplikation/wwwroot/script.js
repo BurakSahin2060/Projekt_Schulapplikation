@@ -26,8 +26,12 @@
                 throw new Error(result || "Fehler beim Hinzufügen des Schülers.");
             }
             document.getElementById("output").textContent = result;
+            document.getElementById("output").classList.remove("alert-danger");
+            document.getElementById("output").classList.add("alert-success");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -56,8 +60,12 @@
                 throw new Error(result || "Fehler beim Hinzufügen des Klassenraums.");
             }
             document.getElementById("output").textContent = result;
+            document.getElementById("output").classList.remove("alert-danger");
+            document.getElementById("output").classList.add("alert-success");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -72,10 +80,12 @@
             const list = document.getElementById("studentsList");
             list.innerHTML = students.map(s => {
                 const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
-                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
+                return `<li class="list-group-item">${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
             }).join("");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -84,6 +94,8 @@
         const klasse = document.getElementById("classFilter").value.trim();
         if (!klasse) {
             document.getElementById("output").textContent = "Bitte eine Klasse eingeben.";
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
             return;
         }
         try {
@@ -95,10 +107,12 @@
             const list = document.getElementById("classStudentsList");
             list.innerHTML = students.map(s => {
                 const birthDate = new Date(s.geburtstag).toLocaleDateString("de-DE");
-                return `<li>${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
+                return `<li class="list-group-item">${s.name} - ${s.klasse} - ${s.geschlecht} - Geburtstag: ${birthDate}</li>`;
             }).join("");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -108,6 +122,8 @@
         const raumName = document.getElementById("checkRoomName").value.trim();
         if (!klasse || !raumName) {
             document.getElementById("output").textContent = "Bitte Klasse und Raumname eingeben.";
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
             return;
         }
         try {
@@ -117,8 +133,13 @@
             }
             const result = await response.json();
             document.getElementById("roomCheckResult").textContent = result;
+            document.getElementById("output").textContent = "Prüfung erfolgreich.";
+            document.getElementById("output").classList.remove("alert-danger");
+            document.getElementById("output").classList.add("alert-success");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -131,8 +152,13 @@
             }
             const result = await response.json();
             document.getElementById("statsOutput").textContent = `Durchschnittsalter: ${result.toFixed(2)} Jahre`;
+            document.getElementById("output").textContent = "Durchschnittsalter erfolgreich abgerufen.";
+            document.getElementById("output").classList.remove("alert-danger");
+            document.getElementById("output").classList.add("alert-success");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 
@@ -141,6 +167,8 @@
         const klasse = document.getElementById("frauenKlasse").value.trim();
         if (!klasse) {
             document.getElementById("output").textContent = "Bitte eine Klasse eingeben.";
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
             return;
         }
         try {
@@ -150,8 +178,13 @@
             }
             const result = await response.json();
             document.getElementById("statsOutput").textContent = `Frauenanteil in Klasse ${klasse}: ${result.toFixed(2)}%`;
+            document.getElementById("output").textContent = "Frauenanteil erfolgreich abgerufen.";
+            document.getElementById("output").classList.remove("alert-danger");
+            document.getElementById("output").classList.add("alert-success");
         } catch (error) {
             document.getElementById("output").textContent = `Fehler: ${error.message}`;
+            document.getElementById("output").classList.remove("alert-success");
+            document.getElementById("output").classList.add("alert-danger");
         }
     });
 });
